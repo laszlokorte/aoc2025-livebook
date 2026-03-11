@@ -56,9 +56,7 @@ roll_char = ?@
 Kino.listen(form, fn %{data: %{grid: grid}} ->
   grid
   # Split text into grid ...
-  |> String.split("\n")
-  # (skip empty lines)
-  |> Enum.filter(&(String.length(&1) != 0))
+  |> String.split("\n", trim: true)
   # ... of chars ...
   |> Enum.map(&String.to_charlist/1)
   # ... and collect into tensor
@@ -87,7 +85,7 @@ Kino.listen(form, fn %{data: %{grid: grid}} ->
     removable_count = removable |> Nx.sum() |> Nx.to_number()
 
     # of the remaining_rolls of all that can bee removed.
-    rolls_left = remaining_rolls |> Nx.logical_and(Nx.logical_not(removable))
+    rolls_left = removable |> Nx.logical_not() |> Nx.logical_and(remaining_rolls)
 
     {removable_count, rolls_left}
   end)
@@ -98,4 +96,34 @@ Kino.listen(form, fn %{data: %{grid: grid}} ->
 end)
 
 form
+```
+
+```elixir
+defmodule Conv do
+  def conv({ax, ay, adata}, {bx, by, bdata}) do
+    {
+      ax - div(bx, 2) + 1,
+      ay - div(by, 2) + 1,
+      for x <- 0..(ax - div(bx, 2)) do
+        for y <- 0..(ay - div(by, 2)) do
+          for dx <- -div(bx-1, 2)..div(bx, 2), dy <- -div(by-1, 2)..div(by, 2), reduce: 0 do
+            sum ->
+              sum +
+                (Enum.at(adata, rem(y - dy, ay)) |> Enum.at(rem(x - dx, ax))) *
+                  (Enum.at(bdata, dy |> rem(by)) |> Enum.at(dx |> rem(bx)))
+          end
+        end
+      end
+    }
+  end
+end
+
+Conv.conv(
+  {5, 5, [[0, 0, 0, 0, 0], [0, 1, 0, 0, 0], [0, 1, 1, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]},
+  {3, 3, [[0, 0, 0, 0, 0], [0, 1, 1, 0, 0], [0, 1, 1, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]}
+)
+```
+
+```elixir
+div(4, 2)..div(4, 2)
 ```

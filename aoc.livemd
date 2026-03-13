@@ -30,7 +30,7 @@ example_input = """
 @.@.@@@.@.
 """
 
-full_input = File.read(Kino.FS.file_path("fullinput.txt"))
+{:ok, full_input}= File.read(Kino.FS.file_path("fullinput.txt"))
 
 Kino.nothing()
 ```
@@ -41,7 +41,7 @@ Kino.nothing()
 form =
   Kino.Control.form(
     [
-      grid: Kino.Input.textarea("Input", monospace: true, default: example_input)
+      grid: Kino.Input.textarea("Input", monospace: true, default: full_input)
     ],
     submit: "Calculate"
   )

@@ -30,7 +30,7 @@ example_input = """
 @.@.@@@.@.
 """
 
-{:ok, full_input}= File.read(Kino.FS.file_path("fullinput.txt"))
+{:ok, full_input} = File.read(Kino.FS.file_path("fullinput.txt"))
 
 Kino.nothing()
 ```
@@ -127,7 +127,7 @@ grid = [
   [0, 0, 0, 0, 0, 0]
 ]
 
-for rows123 <- grid |> Enum.chunk_every(3, 1)  do
+for rows123 <- grid |> Enum.chunk_every(3, 1) do
   for row <- rows123 do
     row
     |> Enum.chunk_every(3, 1)

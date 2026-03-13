@@ -115,32 +115,58 @@ end)
 Kino.Layout.grid([form, output], columns: {1, 2})
 ```
 
-```elixir
-defmodule Conv do
-  def conv({ax, ay, adata}, {bx, by, bdata}) do
-    {
-      ax - div(bx, 2) + 1,
-      ay - div(by, 2) + 1,
-      for x <- 0..(ax - div(bx, 2)) do
-        for y <- 0..(ay - div(by, 2)) do
-          for dx <- -div(bx-1, 2)..div(bx, 2), dy <- -div(by-1, 2)..div(by, 2), reduce: 0 do
-            sum ->
-              sum +
-                (Enum.at(adata, rem(y - dy, ay)) |> Enum.at(rem(x - dx, ax))) *
-                  (Enum.at(bdata, dy |> rem(by)) |> Enum.at(dx |> rem(bx)))
-          end
-        end
-      end
-    }
-  end
-end
+## Convolution by Hand
 
-Conv.conv(
-  {5, 5, [[0, 0, 0, 0, 0], [0, 1, 0, 0, 0], [0, 1, 1, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]},
-  {3, 3, [[0, 0, 0, 0, 0], [0, 1, 1, 0, 0], [0, 1, 1, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]}
-)
+```elixir
+grid = [
+  [0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0]
+]
+
+for rows123 <- grid |> Enum.chunk_every(3, 1)  do
+  for row <- rows123 do
+    row
+    |> Enum.chunk_every(3, 1)
+    |> Enum.map(&Enum.sum/1)
+  end
+  |> Enum.zip_with(&Enum.sum/1)
+end
+|> IO.inspect(charlists: false)
+
+Kino.nothing()
 ```
 
 ```elixir
-div(4, 2)..div(4, 2)
+grid = [
+  [1, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0]
+]
+
+for rows123 <-
+      grid
+      |> Stream.cycle()
+      |> Stream.drop(Enum.count(grid) - 1)
+      |> Stream.chunk_every(3, 1)
+      |> Enum.take(Enum.count(grid)) do
+  for row <- rows123 do
+    row
+    |> Stream.cycle()
+    |> Stream.drop(Enum.count(row) - 1)
+    |> Stream.chunk_every(3, 1)
+    |> Stream.map(&Enum.sum/1)
+    |> Stream.take(Enum.count(row))
+  end
+  |> Enum.zip_with(&Enum.sum/1)
+end
+|> IO.inspect(charlists: false)
+
+Kino.nothing()
 ```

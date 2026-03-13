@@ -1,9 +1,12 @@
+<!-- livebook:{"file_entries":[{"name":"fullinput.txt","type":"attachment"}]} -->
+
 # Advent of Code 2025 Day 4
 
 ```elixir
 Mix.install([
-  {:kino, "~> 0.19.0"},
-  {:nx, "~> 0.11.0"}
+  {:kino, "~> 0.18.0"},
+  {:nx, "~> 0.11.0"},
+  {:kino_zoetrope, "~> 0.16.0"}
 ])
 ```
 
@@ -14,7 +17,7 @@ https://adventofcode.com/2025/day/4
 ## Input
 
 ```elixir
-input = """
+example_input = """
 ..@@.@@@@.
 @@@.@.@.@@
 @@@@@.@.@@
@@ -27,6 +30,8 @@ input = """
 @.@.@@@.@.
 """
 
+full_input = File.read(Kino.FS.file_path("fullinput.txt"))
+
 Kino.nothing()
 ```
 
@@ -36,10 +41,12 @@ Kino.nothing()
 form =
   Kino.Control.form(
     [
-      grid: Kino.Input.textarea("Input", monospace: true, default: input)
+      grid: Kino.Input.textarea("Input", monospace: true, default: example_input)
     ],
     submit: "Calculate"
   )
+
+output = Kino.Frame.new(placeholder: false)
 
 neighbourhood =
   Nx.tensor([
@@ -87,15 +94,25 @@ Kino.listen(form, fn %{data: %{grid: grid}} ->
     # of the remaining_rolls of all that can bee removed.
     rolls_left = removable |> Nx.logical_not() |> Nx.logical_and(remaining_rolls)
 
-    {removable_count, rolls_left}
+    {{removable_count, remaining_rolls}, rolls_left}
   end)
   # now more paper rolls can be removed
-  |> Enum.take_while(&(&1 > 0))
-  |> Enum.sum()
-  |> IO.puts()
+  |> Stream.take_while(&(elem(&1, 0) > 0))
+  |> Stream.map(&elem(&1, 1))
+  |> Enum.to_list()
+  |> Nx.concatenate()
+  |> Nx.transpose(axes: [0, 2, 3, 1])
+  |> KinoZoetrope.TensorStack.new(
+    titel: "Progress",
+    size: 400,
+    legend: false
+  )
+  |> then(&Kino.Frame.render(output, &1))
+
+  output
 end)
 
-form
+Kino.Layout.grid([form, output], columns: {1, 2})
 ```
 
 ```elixir

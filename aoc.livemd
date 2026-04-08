@@ -4,9 +4,11 @@
 
 ```elixir
 Mix.install([
-  {:kino, "~> 0.18.0"},
+  {:kino, "~> 0.19.0"},
   {:nx, "~> 0.11.0"},
-  {:kino_zoetrope, "~> 0.16.0"}
+  {:kino_zoetrope, "~> 0.20.0"},
+  {:exla, "~> 0.11.0"},
+  {:fine, "0.1.4"}
 ])
 ```
 
@@ -15,6 +17,10 @@ Mix.install([
 https://adventofcode.com/2025/day/4
 
 ## Input
+
+```elixir
+Nx.global_default_backend(EXLA.Backend)
+```
 
 ```elixir
 example_input = """

@@ -74,8 +74,6 @@ Kino.listen(form, fn %{data: %{grid: grid}} ->
   |> Enum.map(&String.to_charlist/1)
   # ... and collect into tensor
   |> Nx.tensor()
-  # ...transfer to GPU for faster calculation
-  |> Nx.backend_transfer()
   # ...of zeroes and ones (bool)
   |> Nx.equal(roll_char)
   # ... turn 2d int 4d tensor because Nx.conv needs 4d
